@@ -1,4 +1,4 @@
-contract DemoSum {
+contract Demo {
   int x;
   int y;
 

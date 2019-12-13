@@ -7,7 +7,6 @@ import bsv = require('bsv');
 const BN = bsv.crypto.BN;
 
 const COMPILE_TIMEOUT = 30000; // in ms
-const SRC_SUFFIX = '.scrypt';
 const ASM_SUFFIX = '_asm.json';
 const AST_SUFFIX = '_ast.json';
 
@@ -39,11 +38,11 @@ function literal2Asm(l: boolean | number | string): string {
   }
 }
 
-function _require(sourceFile) {
-  if (!sourceFile) {
+function _require(sourcePath) {
+  if (!sourcePath) {
     throw new Error('You must provide the source file of the contract when creating a contract.');
   }
-  const res = compile(sourceFile);
+  const res = compile(sourcePath);
 
   const Contract = class {
     // properties
@@ -90,26 +89,18 @@ function _require(sourceFile) {
   return Contract;
 }
 
-function getAstFilePath(srcPath: string): string {
+function getCompiledFilePath(srcPath: string): [string /* ast */, string /* asm */] {
   const extension = path.extname(srcPath);
   const srcName = path.basename(srcPath, extension);
-  return srcName + AST_SUFFIX;
+  return [srcName + AST_SUFFIX, srcName + ASM_SUFFIX];
 }
 
-function getAsmFilePath(srcPath: string): string {
-  const extension = path.extname(srcPath);
-  const srcName = path.basename(srcPath, extension);
-  return srcName + ASM_SUFFIX;
-}
-
-// sourceFile -> opcodes
-function compile(sourceFile) {
-  const fileName = path.join(__dirname, sourceFile);
-  const asmFileName: string = getAsmFilePath(fileName);
-  const astFileName: string = getAstFilePath(fileName);
+// sourcePath -> opcodes
+function compile(sourcePath) {
+  const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `scrypt ${fileName} --asm --ast`;
+    const cmd = `scrypt ${sourcePath} --asm --ast`;
     console.log('command: ' + cmd);
     const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
     if (!output.includes('Error')) {
