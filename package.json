@@ -1,0 +1,37 @@
+{
+  "name": "scrypt-test-boilerplate",
+  "version": "0.0.1",
+  "description": "Minimal boilerplate for sCrypt testing projects",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha --exit --require ts-node/register test/*.ts",
+    "bin": "npm run build && node dist/bin/index.js"
+  },
+  "bin": {
+    "ts-boilerplate": "dist/bin/index.js"
+  },
+  "keywords": [
+    "ts",
+    "typescript",
+    "boilerplate",
+    "sample",
+    "example",
+    "javascript"
+  ],
+  "author": "Xiaohui Liu",
+  "license": "sCrypt Inc",
+  "dependencies": {
+    "bsv": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/chai": "4.1.2",
+    "@types/mocha": "2.2.48",
+    "@types/node": "9.4.6",
+    "chai": "^4.1.2",
+    "mocha": "5.0.1",
+    "ts-node": "4.1.0",
+    "tslint": "5.9.1",
+    "typescript": "2.7.2"
+  }
+}
