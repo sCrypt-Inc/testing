@@ -100,7 +100,7 @@ function compile(sourcePath) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `scrypt ${sourcePath} --asm --ast`;
+    const cmd = `scrypt compile ${sourcePath} --asm --ast`;
     console.log('command: ' + cmd);
     const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
     if (!output.includes('Error')) {
