@@ -1,14 +1,14 @@
-// const assert = require('assert');
-import scrypt = require('../src/index');
 import path = require('path');
 import { expect } from 'chai';
 import 'mocha';
 
-describe('First test', () => {
+import { buildContractClass } from '../../src/index';
+
+describe('Test sCrypt Contract Demo', () => {
   let demo;
 
   before(() => {
-    const Demo = scrypt.require(path.join(__dirname, 'contracts/sum.scrypt'));
+    const Demo = buildContractClass(path.join(__dirname, '../contracts/demo.scrypt'));
     demo = new Demo(4, 7);
   });
 

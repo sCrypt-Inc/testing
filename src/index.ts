@@ -38,7 +38,7 @@ function literal2Asm(l: boolean | number | string): string {
   }
 }
 
-function _require(sourcePath) {
+export function buildContractClass(sourcePath) {
   if (!sourcePath) {
     throw new Error('You must provide the source file of the contract when creating a contract.');
   }
@@ -86,7 +86,7 @@ function _require(sourcePath) {
     };
   });
 
-  return Contract;
+  return Contract as any;
 }
 
 function getCompiledFilePath(srcPath: string): [string /* ast */, string /* asm */] {
@@ -100,16 +100,16 @@ function compile(sourcePath) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `scryptc compile ${sourcePath} --asm --ast`;
-    console.log('command: ' + cmd);
+    const cmd = `${__dirname}/../node_modules/scryptc/scrypt.js compile ${sourcePath} --asm --ast`;
+    // console.log('command: ' + cmd);
     const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
     if (!output.includes('Error')) {
-      const opcodeBindings = JSON.parse(fs.readFileSync(asmFileName, 'utf8'));
-      const ast = JSON.parse(fs.readFileSync(astFileName, 'utf8'));
+      const opcodes = fs.readFileSync(asmFileName, 'utf8').trim().split(' ');
+      const ast = JSON.parse(fs.readFileSync(astFileName, 'utf8'))[sourcePath];
       // only for the last main contract
       const mainContract = ast.contracts[ast.contracts.length - 1];
       return {
-        opcodes: opcodeBindings.map((x) => x.opcode),
+        opcodes,
         ctor: mainContract.constructor,
         // public functions only
         functions: mainContract.functions.filter((func) => func.visibility === 'Public'),
@@ -127,5 +127,3 @@ function compile(sourcePath) {
     fs.unlinkSync(astFileName);
   }
 }
-
-module.exports.require = _require;
