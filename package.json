@@ -4,7 +4,8 @@
   "description": "Javascript library for sCrypt project testing",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && cp dist/index.* .",
+    "scryptc": "scryptc",
     "example-test": "mocha --exit --require ts-node/register example/test/*.ts"
   },
   "keywords": [
