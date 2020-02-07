@@ -5,6 +5,9 @@ import fs = require('fs');
 import path = require('path');
 import bsv = require('bsv');
 const BN = bsv.crypto.BN;
+const Interpreter = bsv.Script.Interpreter;
+
+const FLAGS = Interpreter.SCRIPT_VERIFY_MINIMALDATA | Interpreter.SCRIPT_ENABLE_SIGHASH_FORKID | Interpreter.SCRIPT_ENABLE_MAGNETIC_OPCODES | Interpreter.SCRIPT_ENABLE_MONOLITH_OPCODES
 
 const COMPILE_TIMEOUT = 30000; // in ms
 const ASM_SUFFIX = '_asm.json';
@@ -81,8 +84,7 @@ export function buildContractClass(sourcePath) {
 
       const si = bsv.Script.Interpreter();
       // TODO: return error message (si.errstr) also when evaluating to false
-      return si.verify(unlockingScript, lockingScript, null, null, bsv.Script.Interpreter.SCRIPT_VERIFY_P2SH |
-        bsv.Script.Interpreter.SCRIPT_ENABLE_MAGNETIC_OPCODES | bsv.Script.Interpreter.SCRIPT_ENABLE_MONOLITH_OPCODES);
+      return si.verify(unlockingScript, lockingScript, null, null, FLAGS);
     };
   });
 
