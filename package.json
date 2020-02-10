@@ -16,7 +16,7 @@
   "author": "Xiaohui Liu",
   "license": "sCrypt Inc",
   "dependencies": {
-    "bsv": "git+ssh://git@github.com/xhliu/bsv.git#unbound"
+    "bsv": "git+https://github.com/scrypt-sv/bsv.git"
   },
   "devDependencies": {
     "@types/node": "13.7.0",
