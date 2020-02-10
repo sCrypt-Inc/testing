@@ -16,7 +16,8 @@
   "author": "Xiaohui Liu",
   "license": "sCrypt Inc",
   "dependencies": {
-    "bsv": "git+https://github.com/scrypt-sv/bsv.git"
+    "bsv": "git+https://github.com/scrypt-sv/bsv.git",
+    "scryptc": "^0.1.4"
   },
   "devDependencies": {
     "@types/node": "13.7.0",
@@ -27,7 +28,6 @@
     "mocha": "^6.2.2",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3",
-    "scryptc": "^0.1.4",
     "tslint": "^5.16.0"
   }
 }
