@@ -84,7 +84,7 @@ export function buildContractClass(sourcePath) {
 
       const si = bsv.Script.Interpreter();
       // TODO: return error message (si.errstr) also when evaluating to false
-      return si.verify(unlockingScript, lockingScript, null, null, FLAGS);
+      return si.verify(unlockingScript, lockingScript, null, null, FLAGS, new bsv.crypto.BN(0));
     };
   });
 
