@@ -13,8 +13,8 @@
     "Testing",
     "Smart Contract"
   ],
-  "author": "Xiaohui Liu",
-  "license": "sCrypt Inc",
+  "author": "sCrypt Inc",
+  "license": "https://github.com/scrypt-sv/specification/blob/master/LICENSE",
   "dependencies": {
     "bsv": "git+https://github.com/scrypt-sv/bsv.git",
     "scryptc": "^0.1.5"
