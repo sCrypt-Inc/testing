@@ -17,7 +17,7 @@
   "license": "sCrypt Inc",
   "dependencies": {
     "bsv": "git+https://github.com/scrypt-sv/bsv.git",
-    "scryptc": "^0.1.4"
+    "scryptc": "^0.1.5"
   },
   "devDependencies": {
     "@types/node": "13.7.0",
