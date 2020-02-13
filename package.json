@@ -1,23 +1,30 @@
 {
-  "name": "scryptest",
-  "version": "0.0.1",
-  "description": "Javascript library for sCrypt project testing",
-  "main": "index.js",
+  "name": "scrypttest",
+  "version": "0.1.0",
+  "description": "testing library for sCrypt projects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -b && cp dist/index.* .",
-    "scryptc": "scryptc",
+    "prepublishOnly": "tsc",
+    "prepare": "tsc",
     "example-test": "mocha --exit --require ts-node/register example/test/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xhliu/scrypt-testing.git"
   },
   "keywords": [
     "sCrypt",
-    "Testing",
-    "Smart Contract"
+    "testing",
+    "Smart Contract",
+    "bitcoin",
+    "bitcoin-sv"
   ],
   "author": "sCrypt Inc",
-  "license": "https://github.com/scrypt-sv/specification/blob/master/LICENSE",
+  "license": "MIT",
   "dependencies": {
     "bsv": "git+https://github.com/scrypt-sv/bsv.git",
-    "scryptc": "^0.1.5"
+    "scryptc": "^0.1.6"
   },
   "devDependencies": {
     "@types/node": "13.7.0",
