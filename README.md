@@ -1,6 +1,3 @@
-# sCrypt Testing Boilerplate
+# sCrypt testing framework library
 
-```
-npm install
-npm test
-```
+See an example [here](https://github.com/scrypt-sv/boilerplate) on how to use it.
