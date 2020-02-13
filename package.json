@@ -1,13 +1,11 @@
 {
   "name": "scrypttest",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "testing library for sCrypt projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepublishOnly": "tsc",
-    "prepare": "tsc",
-    "example-test": "mocha --exit --require ts-node/register example/test/*.ts"
+    "prepublishOnly": "tsc"
   },
   "repository": {
     "type": "git",
