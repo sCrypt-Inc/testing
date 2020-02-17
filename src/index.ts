@@ -41,7 +41,15 @@ function literal2Asm(l: boolean | number | string): string {
   }
 }
 
-export function buildContractClass(sourcePath) {
+/**
+ * construct a class reflecting sCrypt contract
+ * @param {sourcePath} - path of contract source file (.scrypt)
+ * (the follwoing parameters are only needed to check signature validity for some opcodes like OP_CHECKSIG)
+ * @param {Transaction} tx - the Transaction containing the scriptSig in one input 
+ * @param {number} nin - index of the transaction input containing the scriptSig verified.
+ * @param {number} inputSatoshis - amount in satoshis of the input to be verified (when FORKID signhash is used)
+ */
+function buildContractClass(sourcePath, tx, nin: number, inputSatoshis: number) {
   if (!sourcePath) {
     throw new Error('You must provide the source file of the contract when creating a contract.');
   }
@@ -84,7 +92,7 @@ export function buildContractClass(sourcePath) {
 
       const si = bsv.Script.Interpreter();
       // TODO: return error message (si.errstr) also when evaluating to false
-      return si.verify(unlockingScript, lockingScript, null, null, FLAGS, new bsv.crypto.BN(0));
+      return si.verify(unlockingScript, lockingScript, tx, nin, FLAGS, new bsv.crypto.BN(inputSatoshis));
     };
   });
 
@@ -128,3 +136,8 @@ function compile(sourcePath) {
     fs.unlinkSync(astFileName);
   }
 }
+
+module.exports = {
+  buildContractClass,
+  bsv,
+};
