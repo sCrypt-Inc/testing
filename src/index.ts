@@ -56,8 +56,11 @@ function buildContractClass(sourcePath, tx, nin: number, inputSatoshis: number) 
   const res = compile(sourcePath);
 
   const Contract = class {
-    // properties
-    public static scriptPubKey = res.opcodes;
+    private scriptPubKey: string[];
+
+    public getScriptPubKey(): string {
+      return this.scriptPubKey.join(' ');
+    }
 
     constructor() {
       let args = Array.prototype.slice.call(arguments);
@@ -68,10 +71,10 @@ function buildContractClass(sourcePath, tx, nin: number, inputSatoshis: number) 
         throw new Error('wrong arg#');
       }
       args = args.map((arg) => literal2Asm(arg));
-      // console.log('scriptPubKey before: ' + Contract.scriptPubKey.join(' '));
+
+      this.scriptPubKey = res.opcodes;
       // TODO: replace $x with x value, not simply based on position, since $x may not be at the beginning after optimization
-      Contract.scriptPubKey.splice(0, args.length, ...args);
-      // console.log('scriptPubKey after: ' + Contract.scriptPubKey.join(' '));
+      this.scriptPubKey.splice(0, args.length, ...args);
     }
   };
 
@@ -87,7 +90,7 @@ function buildContractClass(sourcePath, tx, nin: number, inputSatoshis: number) 
       args = args.map((arg) => literal2Asm(arg));
       const scriptSig = args.join(' ');
 
-      const lockingScript = bsv.Script.fromASM(Contract.scriptPubKey.join(' '));
+      const lockingScript = bsv.Script.fromASM(this.getScriptPubKey());
       const unlockingScript = bsv.Script.fromASM(scriptSig);
 
       const si = bsv.Script.Interpreter();
