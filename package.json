@@ -1,6 +1,6 @@
 {
   "name": "scrypttest",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "testing library for sCrypt projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "bsv": "git+https://github.com/scrypt-sv/bsv.git",
-    "scryptc": "^0.1.6"
+    "scryptc": "^0.1.9"
   },
   "devDependencies": {
     "@types/node": "13.7.0",
