@@ -49,7 +49,7 @@ function literal2Asm(l: boolean | number | string): string {
  * @param {number} nin - index of the transaction input containing the scriptSig verified.
  * @param {number} inputSatoshis - amount in satoshis of the input to be verified (when FORKID signhash is used)
  */
-function buildContractClass(sourcePath, tx, nin: number, inputSatoshis: number) {
+function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: number) {
   if (!sourcePath) {
     throw new Error('You must provide the source file of the contract when creating a contract.');
   }
@@ -144,3 +144,5 @@ module.exports = {
   buildContractClass,
   bsv,
 };
+
+export { buildContractClass, bsv };
