@@ -113,7 +113,7 @@ function compile(sourcePath) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `node_modules/.bin/scryptc -- compile ${sourcePath} --asm --ast`;
+    const cmd = `node "node_modules/scryptc/scrypt.js" -- compile "${sourcePath}" --asm --ast`;
     const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
     if (!output.includes('Error')) {
       const opcodes = fs.readFileSync(asmFileName, 'utf8').trim().split(' ');
@@ -135,8 +135,12 @@ function compile(sourcePath) {
       : err.code || err.toString();
     throw new Error('Compilation error: ' + error);
   } finally {
-    fs.unlinkSync(asmFileName);
-    fs.unlinkSync(astFileName);
+    if (fs.existsSync(asmFileName)) {
+      fs.unlinkSync(asmFileName);
+    }
+    if (fs.existsSync(astFileName)) {
+      fs.unlinkSync(astFileName);
+    }
   }
 }
 
