@@ -1,6 +1,6 @@
 {
   "name": "scrypttest",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "testing library for sCrypt projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xhliu/scrypt-testing.git"
+    "url": "git+https://github.com/scrypt-sv/testing.git"
   },
   "keywords": [
     "sCrypt",
