@@ -66,6 +66,10 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
       return this.scriptPubKey.join(' ');
     }
 
+    public setScriptPubKey(scriptPubKey: string) {
+      this.scriptPubKey = scriptPubKey.split(' ');
+    }
+
     constructor() {
       let args = Array.prototype.slice.call(arguments);
       // TODO: handle case of no ctor
