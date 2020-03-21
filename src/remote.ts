@@ -8,10 +8,8 @@ import bsv = require('bsv');
 
 const NETWORK = 'test';
 const API_PREFIX = 'https://api.whatsonchain.com/v1/bsv/' + NETWORK;
-const MIN_FEE = 546;
 // TODO: adapt to script/tx size using fee per byte
-const LOCK_AMOUNT = 100000;
-const UNLOCK_AMOUNT = LOCK_AMOUNT - 10000;
+const MIN_FEE = 546;
 const INPUT_IDX = 0;
 const FLAGS = bsv.Script.Interpreter.SCRIPT_VERIFY_MINIMALDATA | bsv.Script.Interpreter.SCRIPT_ENABLE_SIGHASH_FORKID | bsv.Script.Interpreter.SCRIPT_ENABLE_MAGNETIC_OPCODES | bsv.Script.Interpreter.SCRIPT_ENABLE_MONOLITH_OPCODES;
 const SIGHASH_TYPE = bsv.crypto.Signature.SIGHASH_ALL | bsv.crypto.Signature.SIGHASH_FORKID;
@@ -28,11 +26,11 @@ const fetchUtxos = async (address) => {
 };
 
 // lock fund in a script
-const buildScriptLockTx = (utxos, scriptPubKey, privateKey) => {
+const buildScriptLockTx = (utxos, scriptPubKey, privateKey, amount) => {
     const tx = new bsv.Transaction().from(utxos);
     tx.addOutput(new bsv.Transaction.Output({
         script: scriptPubKey,
-        satoshis: LOCK_AMOUNT,
+        satoshis: amount,
     }));
     tx.change(privateKey.toAddress());
     if (tx.getFee() < MIN_FEE) {
@@ -42,15 +40,15 @@ const buildScriptLockTx = (utxos, scriptPubKey, privateKey) => {
 };
 
 // unlock fund from a script
-const buildScriptUnlockTx = (prevTxId, scriptPubKey) => {
+const buildScriptUnlockTx = (prevTxId, scriptPubKey, inputAmount, newScriptPubKey, outputAmount) => {
     const tx = new bsv.Transaction().addInput(new bsv.Transaction.Input({
         prevTxId,
         outputIndex: 0,
         script: new bsv.Script(),   // placeholder
-    }), scriptPubKey, LOCK_AMOUNT);
+    }), scriptPubKey, inputAmount);
     tx.addOutput(new bsv.Transaction.Output({
-        script: scriptPubKey,
-        satoshis: UNLOCK_AMOUNT,
+        script: newScriptPubKey,
+        satoshis: outputAmount,
     }));
     // no need to sign since scriptSig is already set
     return tx;
@@ -64,7 +62,7 @@ const sendTx = async (txhex) => {
 };
 
 // send tx to send funds to locking script
-const lockScriptTx = async (scriptPubKeyStr, key) => {
+const lockScriptTx = async (scriptPubKeyStr, key, amount) => {
     const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
     const privateKey = new bsv.PrivateKey(key);
 
@@ -72,19 +70,20 @@ const lockScriptTx = async (scriptPubKeyStr, key) => {
     const utxos = await fetchUtxos(privateKey.toAddress());
 
     // step 2: build the locking tx and sign it
-    const lockingTx = buildScriptLockTx(utxos, scriptPubKey, privateKey);
+    const lockingTx = buildScriptLockTx(utxos, scriptPubKey, privateKey, amount);
 
     // step 3: serialize and broadcast the locking tx
     return await sendTx(lockingTx.serialize());
 };
 
 // send tx to unlock previously locked fund
-const unlockScriptTx = async (scriptSigStr, lockingTxid, scriptPubKeyStr) => {
+const unlockScriptTx = async (scriptSigStr, lockingTxid, scriptPubKeyStr, inputAmount, newScriptPubKeyStr, outputAmount) => {
     const scriptSig = bsv.Script.fromASM(scriptSigStr);
     const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
+    const newScriptPubKey = bsv.Script.fromASM(newScriptPubKeyStr);
 
     // step 1: build the unlocking tx
-    const unlockingTx = buildScriptUnlockTx(lockingTxid, scriptPubKey);
+    const unlockingTx = buildScriptUnlockTx(lockingTxid, scriptPubKey, inputAmount, newScriptPubKey, outputAmount);
     unlockingTx.inputs[INPUT_IDX].setScript(scriptSig);
 
     // step 2: serialize and send it
@@ -92,10 +91,11 @@ const unlockScriptTx = async (scriptSigStr, lockingTxid, scriptPubKeyStr) => {
 };
 
 // helper function to get sighash preimage
-const getSighashPreimage = (lockingTxid, scriptPubKeyStr) => {
+const getSighashPreimage = (lockingTxid, scriptPubKeyStr, inputAmount, newScriptPubKeyStr, outputAmount) => {
     const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
-    const unlockingTx = buildScriptUnlockTx(lockingTxid, scriptPubKey);
-    const preimage = bsv.Transaction.sighash.sighashPreimage(unlockingTx, SIGHASH_TYPE, INPUT_IDX, scriptPubKey, new bsv.crypto.BN(LOCK_AMOUNT), FLAGS);
+    const newScriptPubKey = bsv.Script.fromASM(newScriptPubKeyStr);
+    const unlockingTx = buildScriptUnlockTx(lockingTxid, scriptPubKey, inputAmount, newScriptPubKey, outputAmount);
+    const preimage = bsv.Transaction.sighash.sighashPreimage(unlockingTx, SIGHASH_TYPE, INPUT_IDX, scriptPubKey, new bsv.crypto.BN(inputAmount), FLAGS);
     return preimage.toString('hex');
 };
 
