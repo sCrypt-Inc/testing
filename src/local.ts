@@ -72,9 +72,10 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
 
     constructor() {
       let args = Array.prototype.slice.call(arguments);
-      // TODO: handle case of no ctor
+      // handle case of no ctor
+      const ctorParamLen = res.ctor ? res.ctor.params.length : 0;
       // TODO: arguments type check, besides number check
-      if (args && res.ctor.params && args.length !== res.ctor.params.length) {
+      if (args.length !== ctorParamLen) {
         // TODO: better error message
         throw new Error('wrong arg#');
       }
