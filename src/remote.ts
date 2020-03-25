@@ -99,6 +99,15 @@ const getSighashPreimage = (lockingTxid, scriptPubKeyStr, inputAmount, newScript
     return preimage.toString('hex');
 };
 
+// helper function to get signature
+const getSignature = (lockingTxid, privateKey, scriptPubKeyStr, inputAmount, newScriptPubKeyStr, outputAmount) => {
+    const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
+    const newScriptPubKey = bsv.Script.fromASM(newScriptPubKeyStr);
+    const unlockingTx = buildScriptUnlockTx(lockingTxid, scriptPubKey, inputAmount, newScriptPubKey, outputAmount);
+    const sig = bsv.Transaction.sighash.sign(unlockingTx, privateKey, SIGHASH_TYPE, INPUT_IDX, scriptPubKey, new bsv.crypto.BN(inputAmount), FLAGS).toTxFormat();
+    return sig.toString('hex');
+};
+
 // print out error
 const showError = (error) => {
     // Error
@@ -124,7 +133,8 @@ module.exports = {
     lockScriptTx,
     unlockScriptTx,
     getSighashPreimage,
+    getSignature,
     showError,
 };
 
-export { lockScriptTx, unlockScriptTx, getSighashPreimage, showError };
+export { lockScriptTx, unlockScriptTx, getSighashPreimage, getSignature, showError };
