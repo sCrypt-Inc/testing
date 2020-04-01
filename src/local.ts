@@ -122,7 +122,7 @@ function compile(sourcePath) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `node "node_modules/scryptc/scrypt.js" -- compile "${sourcePath}" --asm --ast`;
+    const cmd = `node "node_modules/scryptc/scrypt.js" compile "${sourcePath}" --asm --ast`;
     const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
     if (!output.includes('Error')) {
       const opcodes = fs.readFileSync(asmFileName, 'utf8').trim().split(' ');
