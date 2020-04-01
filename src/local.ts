@@ -73,7 +73,7 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
     constructor() {
       let args = Array.prototype.slice.call(arguments);
       // handle case of no ctor
-      const ctorParamLen = res.ctor ? res.ctor.params.length : 0;
+      const ctorParamLen = res.ctor ? res.ctor.params.length : res.properties.length;
       // TODO: arguments type check, besides number check
       if (args.length !== ctorParamLen) {
         // TODO: better error message
@@ -132,6 +132,7 @@ function compile(sourcePath) {
       return {
         opcodes,
         ctor: mainContract.constructor,
+        properties: mainContract.properties,
         // public functions only
         functions: mainContract.functions.filter((func) => func.visibility === 'Public'),
       };
