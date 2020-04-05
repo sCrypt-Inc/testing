@@ -23,7 +23,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "bsv": "git+https://github.com/scrypt-sv/bsv.git",
-    "scryptc": "^0.1.13"
+    "scryptc": "^0.1.16"
   },
   "devDependencies": {
     "@types/node": "13.7.0",
