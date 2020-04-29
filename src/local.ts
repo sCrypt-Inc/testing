@@ -87,7 +87,7 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
     }
   };
 
-  res.functions.map((func) => {
+  res.functions.map((func, index: number) => {
     // contract functions
     Contract.prototype[func.name] = function(): boolean {
       let args = Array.prototype.slice.call(arguments);
@@ -97,7 +97,11 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
       }
 
       args = args.map((arg) => literal2Asm(arg));
-      const scriptSig = args.join(' ');
+      let scriptSig = args.join(' ');
+      if (res.functions.length > 1) {
+        // append function selector if there are multiple public functions
+        scriptSig += ' ' + literal2Asm(index + 1);
+      }
 
       const lockingScript = bsv.Script.fromASM(this.getScriptPubKey());
       const unlockingScript = bsv.Script.fromASM(scriptSig);
