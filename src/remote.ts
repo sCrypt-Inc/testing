@@ -54,6 +54,49 @@ const buildScriptUnlockTx = (prevTxId, scriptPubKey, inputAmount, newScriptPubKe
     return tx;
 };
 
+// unlock funds from a script, but, add an extra input (funding) and output (change)
+const buildFundedScriptUnlockTx = (utxos, privateKey, prevTxId,
+            scriptPubKey, inputAmount, newScriptPubKey, outputAmount) => {
+
+    // derive PKH from Private Key - to sign P2PKH funding
+    const fundingPubKey = bsv.PublicKey.fromPrivateKey(privateKey).toBuffer();
+    const fundingPKH = Hash.sha256ripemd160(fundingPubKey);
+    const fundingPKHstr = fundingPKH.toString('hex');
+    const fundingScriptPubKey = Script.fromASM("OP_DUP OP_HASH160 " + fundingPKHstr + " OP_EQUALVERIFY OP_CHECKSIG");
+
+    const fundingAmount = utxos[0].satoshis;
+    const fundingTxid = utxos[0].txId;
+    const fundingOutputIndex = utxos[0].outputIndex;
+
+    const tx = new bsv.Transaction();
+
+    tx.addInput(new bsv.Transaction.Input({
+        prevTxId,
+        outputIndex: 0,
+        script: new bsv.Script(),   // placeholder
+    }), scriptPubKey, inputAmount);
+
+    tx.addInput(new bsv.Transaction.Input({
+        prevTxId: fundingTxId,
+        outputIndex: fundingOutputIndex,
+        script: new bsv.Script(),
+    }), fundingScriptPubKey, fundingAmount);
+
+    tx.addOutput(new bsv.Transaction.Output({
+        script: newScriptPubKey,
+        satoshis: outputAmount,
+    }));
+
+    tx.change(privateKey.toAddress());
+
+    if (tx.getFee() < MIN_FEE) {
+        tx.fee(MIN_FEE);
+    }
+
+    // We'll sign it later
+    return tx;
+};
+
 const sendTx = async (txhex) => {
     const { data: txid } = await axios.post(`${API_PREFIX}/tx/raw`, {
         txhex,
@@ -90,6 +133,47 @@ const unlockScriptTx = async (scriptSigStr, lockingTxid, scriptPubKeyStr, inputA
     return await sendTx(unlockingTx.serialize());
 };
 
+
+// send tx to fund and unlock previously locked funds, but, add extra input (funding) and output (change)
+const unlockFundedScriptTx = (key, scriptSigStr, lockingTxid, scriptPubKeyStr, inputAmount, newScriptPubKeyStr, outputAmount) => __awaiter(void 0, void 0, void 0, function* () {
+    const scriptSig = bsv.Script.fromASM(scriptSigStr);
+    const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
+    const newScriptPubKey = bsv.Script.fromASM(newScriptPubKeyStr);
+
+    // step 1: fetch utxos
+    const privateKey = new bsv.PrivateKey(key);
+    const utxos = yield fetchUtxos(privateKey.toAddress());
+
+    // step 2: build the unlocking tx
+    const unlockingTx = buildFundedScriptUnlockTx(utxos, privateKey, lockingTxid, scriptPubKey, inputAmount, newScriptPubKey, outputAmount);
+
+    // step 3: set the scriptSig on the zeroth input
+    unlockingTx.inputs[INPUT_IDX].setScript(scriptSig);
+
+    // step 4: sign the external funding input
+    const txSig1 = new TransactionSignature({
+            publicKey: bsv.PublicKey.fromPrivateKey(privateKey),
+            prevTxId: unlockingTx.inputs[INPUT_IDX + 1].prevTxId,
+            outputIndex: unlockingTx.inputs[INPUT_IDX + 1].outputIndex,
+            inputIndex: INPUT_INDEX + 1,
+            signature: Sighash.sign(unlockingTx, privateKey, SIGHASH_TYPE,
+                               INPUT_INDEX + 1,
+                               unlockingTx.inputs[INPUT_IDX + 1].output.script,
+                               unlockingTx.inputs[INPUT_IDX + 1].output.satoshisBN),
+            sigtype: SIGHASH_TYPE
+        });
+
+    unlockingTx.inputs[INPUT_IDX + 1].setScript(Script.buildPublicKeyHashIn(
+            txSig1.publicKey,
+            txSig1.signature.toDER(),
+            txSig1.sigtype
+    ))
+
+    // step 5: serialize and send it.
+    return yield sendTx(unlockingTx.serialize());
+});
+
+
 // helper function to get sighash preimage
 const getSighashPreimage = (lockingTxid, scriptPubKeyStr, inputAmount, newScriptPubKeyStr, outputAmount) => {
     const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
@@ -107,6 +191,30 @@ const getSignature = (lockingTxid, privateKey, scriptPubKeyStr, inputAmount, new
     const sig = bsv.Transaction.sighash.sign(unlockingTx, privateKey, SIGHASH_TYPE, INPUT_IDX, scriptPubKey, new bsv.crypto.BN(inputAmount), FLAGS).toTxFormat();
     return sig.toString('hex');
 };
+
+// helper function to get sighash preimage, but, add extra input (funding) and output (change)
+// Use alternate build: buildFundedScriptUnlockTx()
+const getFundedSighashPreimage = (key, lockingTxid, scriptPubKeyStr, inputAmount, newScriptPubKeyStr, outputAmount) => __awaiter(void 0, void 0, void 0, function* () {
+
+    const scriptPubKey = bsv.Script.fromASM(scriptPubKeyStr);
+    const newScriptPubKey = bsv.Script.fromASM(newScriptPubKeyStr);
+
+    // step 1: fetch utxos
+    const privateKey = new bsv.PrivateKey(key);
+    const utxos = yield fetchUtxos(privateKey.toAddress());
+
+    const unlockingTx = buildFundedScriptUnlockTx(utxos, privateKey, lockingTxid, scriptPubKey, inputAmount, newScriptPubKey, outputAmount);
+
+    const preimage = bsv.Transaction.sighash.sighashPreimage(unlockingTx, SIGHASH_ALLANY, INPUT_IDX, scriptPubKey, new bsv.crypto.BN(inputAmount), FLAGS);
+
+    const fee1 = unlockingTx._inputAmount - unlockingTx._outputAmount;
+    const satsChange = unlockingTx.outputs[1]._satoshis;
+
+    return { preimage: preimage.toString('hex'),
+             change: satsChange,
+             fee: fee1
+    };
+});
 
 // print out error
 const showError = (error) => {
@@ -132,9 +240,11 @@ const showError = (error) => {
 module.exports = {
     lockScriptTx,
     unlockScriptTx,
+    unlockFundedScriptTx,
     getSighashPreimage,
+    getFundedSighashPreimage,
     getSignature,
     showError,
 };
 
-export { lockScriptTx, unlockScriptTx, getSighashPreimage, getSignature, showError };
+export { lockScriptTx, unlockScriptTx, unlockFundedScriptTx, getSighashPreimage, getFundedSighashPreimage, getSignature, showError };
