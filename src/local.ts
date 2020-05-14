@@ -17,32 +17,30 @@ const COMPILE_TIMEOUT = 30000; // in ms
 const ASM_SUFFIX = '_asm.json';
 const AST_SUFFIX = '_ast.json';
 
-function int2sm(num: number): string {
+function int2sm(num: number | BigInt): string {
   if (num === -1) { return 'OP_1NEGATE'; }
 
   if (num >= 0 && num <= 16) { return 'OP_' + num; }
 
-  const n = BN.fromNumber(num);
+  const n = typeof num === 'number' ? BN.fromNumber(num) : new BN(num.toString());
   const m = n.toSM({ endian: 'little' });
   return m.toString('hex');
 }
 
 // TODO: error handling
 // convert literals to script ASM format
-function literal2Asm(l: boolean | number | string): string {
+function literal2Asm(l: boolean | string | number | BigInt): string {
   // bool
-  if (l === false) { return 'OP_FALSE'; }
-  if (l === true) { return 'OP_TRUE'; }
+  if (l === false)  { return 'OP_FALSE'; }
+  if (l === true)   { return 'OP_TRUE'; }
 
-  // hex int/bytes
+  // bytes
   if (typeof l === 'string') {
-    if (l.startsWith('0x')) { return l.slice(2);
-  } }
-
-  // decimal int
-  if (typeof l === 'number') {
-    return int2sm(l);
+    return l;
   }
+
+  // int
+  return int2sm(l);
 }
 
 /**
