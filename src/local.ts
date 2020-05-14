@@ -17,7 +17,8 @@ const COMPILE_TIMEOUT = 30000; // in ms
 const ASM_SUFFIX = '_asm.json';
 const AST_SUFFIX = '_ast.json';
 
-function int2sm(num: number | BigInt): string {
+// convert int literals to script ASM format
+function int2Asm(num: number | BigInt): string {
   if (num === -1) { return 'OP_1NEGATE'; }
 
   if (num >= 0 && num <= 16) { return 'OP_' + num; }
@@ -40,7 +41,7 @@ function literal2Asm(l: boolean | string | number | BigInt): string {
   }
 
   // int
-  return int2sm(l);
+  return int2Asm(l);
 }
 
 /**
@@ -159,6 +160,8 @@ function compile(sourcePath) {
 module.exports = {
   buildContractClass,
   bsv,
+  int2Asm,
+  literal2Asm,
 };
 
-export { buildContractClass, bsv };
+export { buildContractClass, bsv, int2Asm, literal2Asm };
