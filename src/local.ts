@@ -125,10 +125,11 @@ function compile(sourcePath) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `node "node_modules/scryptc/scrypt.js" compile "${sourcePath}" --asm --ast`;
+    const cmd = `node "node_modules/scryptc/scrypt.js" compile "${sourcePath}" --asm --ast --debug`;
     const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
     if (!output.includes('Error')) {
-      const opcodes = fs.readFileSync(asmFileName, 'utf8').trim().split(' ');
+      const asmObj = JSON.parse(fs.readFileSync(asmFileName, 'utf8'));
+      const opcodes = asmObj.output.map(e => e.opcode);
       const ast = JSON.parse(fs.readFileSync(astFileName, 'utf8'))[sourcePath];
       // only for the last main contract
       const mainContract = ast.contracts[ast.contracts.length - 1];
