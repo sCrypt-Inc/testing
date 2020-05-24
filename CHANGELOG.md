@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.1.27
+
+Bug fixes:
+
+* Remove logging from previous version
+
+## 0.1.26
+
+Bug fixes:
+
+* Handle constructor parameters (e.g., $x) not at the beginning of compiled script output.
+
 ## 0.1.25
 
 Enhancements:

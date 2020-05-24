@@ -72,17 +72,28 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
     constructor() {
       let args = Array.prototype.slice.call(arguments);
       // handle case of no ctor
-      const ctorParamLen = res.ctor ? res.ctor.params.length : res.properties.length;
+      const ctorParams = res.ctor ? res.ctor.params : res.properties;
       // TODO: arguments type check, besides number check
-      if (args.length !== ctorParamLen) {
-        // TODO: better error message
-        throw new Error('wrong arg#');
+      if (args.length !== ctorParams.length) {
+        throw new Error(`Expected ${ctorParams.length} constructor arguments, but got ${args.length}`);
       }
       args = args.map((arg) => literal2Asm(arg));
+      const ctorParamNames = ctorParams.map((param) => param.name.startsWith('this.') ? param.name.substring(5) : param.name);
 
-      this.scriptPubKey = res.opcodes;
-      // TODO: replace $x with x value, not simply based on position, since $x may not be at the beginning after optimization
-      this.scriptPubKey.splice(0, args.length, ...args);
+      // instantiate contract w/ constructor arguments
+      this.scriptPubKey = res.opcodes.map((opcode) => {
+          if (opcode.startsWith('$')) {
+            const param = opcode.substring(1);
+            const idx = ctorParamNames.indexOf(param);
+            if (idx === -1) {
+              throw new Error(`"$${param}" in compiled script is not a constructor parameter, something in compiler is wrong`);
+            }
+            // substitute $x with x value
+            return args[idx];
+          }
+          return opcode;
+        },
+      );
     }
   };
 
