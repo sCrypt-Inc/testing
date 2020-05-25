@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.29
+
+Enhancements:
+
+* Clean timeout error
+
 ## 0.1.28
 
 Enhancements:

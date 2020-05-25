@@ -1,6 +1,6 @@
 {
   "name": "scrypttest",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "description": "testing library for sCrypt projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

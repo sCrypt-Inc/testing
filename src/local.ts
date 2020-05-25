@@ -154,9 +154,7 @@ function compile(sourcePath) {
       throw new Error('Compilation fails: ' + output);
     }
   } catch (err) {
-    const error = err.code === 'ETIMEDOUT'
-      ? 'Compilation timed out, likely too many loops. Please reduce loops and retry.'
-      : err.code || err.toString();
+    const error = err.code || err.toString();
     throw new Error('Compilation error: ' + error);
   } finally {
     if (fs.existsSync(asmFileName)) {
