@@ -13,7 +13,6 @@ const Interpreter = bsv.Script.Interpreter;
 
 const FLAGS = Interpreter.SCRIPT_VERIFY_MINIMALDATA | Interpreter.SCRIPT_ENABLE_SIGHASH_FORKID | Interpreter.SCRIPT_ENABLE_MAGNETIC_OPCODES | Interpreter.SCRIPT_ENABLE_MONOLITH_OPCODES;
 
-const COMPILE_TIMEOUT = 30000; // in ms
 const ASM_SUFFIX = '_asm.json';
 const AST_SUFFIX = '_ast.json';
 
@@ -137,7 +136,7 @@ function compile(sourcePath) {
 
   try {
     const cmd = `node "node_modules/scryptc/scrypt.js" compile "${sourcePath}" --asm --ast --debug`;
-    const output = childProcess.execSync(cmd, { timeout: COMPILE_TIMEOUT }).toString();
+    const output = childProcess.execSync(cmd).toString();
     if (!output.includes('Error')) {
       const asmObj = JSON.parse(fs.readFileSync(asmFileName, 'utf8'));
       const opcodes = asmObj.output.map(e => e.opcode);

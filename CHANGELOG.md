@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.28
+
+Enhancements:
+
+* Remove compile timeout
+
 ## 0.1.27
 
 Bug fixes:
