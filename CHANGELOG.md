@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.30
+
+Bug fixes:
+
+* Fix compile bug on windows platfrom.
+
 ## 0.1.29
 
 Enhancements:

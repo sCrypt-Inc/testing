@@ -127,7 +127,10 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
 function getCompiledFilePath(srcPath: string): [string /* ast */, string /* asm */] {
   const extension = path.extname(srcPath);
   const srcName = path.basename(srcPath, extension);
-  return [srcName + AST_SUFFIX, srcName + ASM_SUFFIX];
+  return [
+    path.join(path.dirname(srcPath), srcName + AST_SUFFIX),
+    path.join(path.dirname(srcPath), srcName + ASM_SUFFIX)
+  ];
 }
 
 // sourcePath -> opcodes
@@ -135,8 +138,8 @@ function compile(sourcePath) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `node "node_modules/scryptc/scrypt.js" compile "${sourcePath}" --asm --ast --debug`;
-    const output = childProcess.execSync(cmd).toString();
+    const cmd = `node "${path.join(__dirname, "../../scryptc/scrypt.js")}" compile "${sourcePath}" --asm --ast --debug`;
+    const output = childProcess.execSync(cmd, {cwd: path.dirname(sourcePath)}).toString();
     if (!output.includes('Error')) {
       const asmObj = JSON.parse(fs.readFileSync(asmFileName, 'utf8'));
       const opcodes = asmObj.output.map(e => e.opcode);
