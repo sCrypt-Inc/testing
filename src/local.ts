@@ -134,15 +134,16 @@ function getCompiledFilePath(srcPath: string): [string /* ast */, string /* asm 
 }
 
 // sourcePath -> opcodes
-function compile(sourcePath) {
+// debug: debug/production mode
+function compile(sourcePath: string, debug = true) {
   const [astFileName, asmFileName] = getCompiledFilePath(sourcePath);
 
   try {
-    const cmd = `node "${path.join(__dirname, "../../scryptc/scrypt.js")}" compile "${sourcePath}" --asm --ast --debug`;
+    const cmd = `node "${path.join(__dirname, '../../scryptc/scrypt.js')}" compile "${sourcePath}" --asm --ast ${debug ? '--debug' : ''}`;
     const output = childProcess.execSync(cmd, {cwd: path.dirname(sourcePath)}).toString();
     if (!output.includes('Error')) {
-      const asmObj = JSON.parse(fs.readFileSync(asmFileName, 'utf8'));
-      const opcodes = asmObj.output.map(e => e.opcode);
+      const asmStr = fs.readFileSync(asmFileName, 'utf8');
+      const opcodes = debug ? JSON.parse(asmStr).output.map(e => e.opcode) : asmStr.split(' ');
       const ast = JSON.parse(fs.readFileSync(astFileName, 'utf8'))[sourcePath];
       // only for the last main contract
       const mainContract = ast.contracts[ast.contracts.length - 1];
