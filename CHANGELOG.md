@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.32
+
+Enhancements:
+
+* Bump `scryptc` to 0.1.20
+
 ## 0.1.30
 
 Bug fixes:
