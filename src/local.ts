@@ -47,8 +47,8 @@ function literal2Asm(l: boolean | string | number | BigInt): string {
  * construct a class reflecting sCrypt contract
  * @param {sourcePath} - path of contract source file (.scrypt)
  * (the follwoing parameters are only needed to check signature validity for some opcodes like OP_CHECKSIG)
- * @param {Transaction} tx - the Transaction containing the scriptSig in one input
- * @param {number} nin - index of the transaction input containing the scriptSig verified.
+ * @param {Transaction} tx - the Transaction containing the unlockingScript in one input
+ * @param {number} nin - index of the transaction input containing the unlockingScript verified.
  * @param {number} inputSatoshis - amount in satoshis of the input to be verified (when FORKID signhash is used)
  */
 function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: number) {
@@ -58,14 +58,14 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
   const res = compile(sourcePath);
 
   const Contract = class {
-    private scriptPubKey: string[];
+    private lockingScript: string[];
 
-    public getScriptPubKey(): string {
-      return this.scriptPubKey.join(' ');
+    public getLockingScript(): string {
+      return this.lockingScript.join(' ');
     }
 
-    public setScriptPubKey(scriptPubKey: string) {
-      this.scriptPubKey = scriptPubKey.split(' ');
+    public setLockingScript(lockingScript: string) {
+      this.lockingScript = lockingScript.split(' ');
     }
 
     constructor() {
@@ -80,7 +80,7 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
       const ctorParamNames = ctorParams.map((param) => param.name.startsWith('this.') ? param.name.substring(5) : param.name);
 
       // instantiate contract w/ constructor arguments
-      this.scriptPubKey = res.opcodes.map((opcode) => {
+      this.lockingScript = res.opcodes.map((opcode) => {
           if (opcode.startsWith('$')) {
             const param = opcode.substring(1);
             const idx = ctorParamNames.indexOf(param);
@@ -106,14 +106,14 @@ function buildContractClass(sourcePath, tx?, nin?: number, inputSatoshis?: numbe
       }
 
       args = args.map((arg) => literal2Asm(arg));
-      let scriptSig = args.join(' ');
+      let unlockingScriptAsm = args.join(' ');
       if (res.functions.length > 1) {
         // append function selector if there are multiple public functions
-        scriptSig += ' ' + literal2Asm(index + 1);
+        unlockingScriptAsm += ' ' + literal2Asm(index + 1);
       }
 
-      const lockingScript = bsv.Script.fromASM(this.getScriptPubKey());
-      const unlockingScript = bsv.Script.fromASM(scriptSig);
+      const lockingScript = bsv.Script.fromASM(this.getLockingScript());
+      const unlockingScript = bsv.Script.fromASM(unlockingScriptAsm);
 
       const si = bsv.Script.Interpreter();
       // TODO: return error message (si.errstr) also when evaluating to false
