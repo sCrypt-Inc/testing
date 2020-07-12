@@ -244,7 +244,8 @@ module.exports = {
     getSighashPreimage,
     getFundedSighashPreimage,
     getSignature,
+    sendTx,
     showError,
 };
 
-export { lockScriptTx, unlockScriptTx, unlockFundedScriptTx, getSighashPreimage, getFundedSighashPreimage, getSignature, showError };
+export { lockScriptTx, unlockScriptTx, unlockFundedScriptTx, getSighashPreimage, getFundedSighashPreimage, getSignature, sendTx, showError };
