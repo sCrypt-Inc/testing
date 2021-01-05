@@ -21,7 +21,7 @@
   "author": "sCrypt Inc",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bsv": "git+https://github.com/scrypt-sv/bsv.git",
     "scryptc": "0.1.20"
   },
