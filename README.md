@@ -1,3 +1,3 @@
 # sCrypt testing framework library
 
-See an example [here](https://github.com/scrypt-sv/boilerplate) on how to use it.
+This has been deprecated now [new SDK](https://github.com/sCrypt-Inc/scryptlib) is available.
